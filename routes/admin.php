@@ -34,4 +34,7 @@ Route::middleware(['auth','cekJabatan:admin,kaprodi,laboran,adminprodi'])->prefi
     Route::put('pengurus/tolakPengaduan/{id}',[PengurusController::class,'tolakPengaduan']);
     Route::put('manage/updateStatusData/{id}',[ManageStatusController::class,'updateStatusData']);
     Route::get('adminProfile/{id}',[DashboardController::class,'showProfile']);
+    Route::get('showChartMinggu',[DashboardController::class,'showChartMinggu']);
+    Route::get('showChartBulan',[DashboardController::class,'showChartBulan']);
+    Route::get('showChartTahun',[DashboardController::class,'showChartTahun']);
 });

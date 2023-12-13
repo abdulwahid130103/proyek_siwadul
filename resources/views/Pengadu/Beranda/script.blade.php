@@ -1,6 +1,7 @@
 <script>
     $('body').on('click', '.button-kode-pengaduan', function(e) {
         e.preventDefault();
+        $('#data-detail').empty();
         $.ajax({
             url: '/beranda',
             type: 'POST',

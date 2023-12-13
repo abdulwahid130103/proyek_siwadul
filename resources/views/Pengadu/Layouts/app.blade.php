@@ -84,6 +84,49 @@
     
     {{ $script }}
 
+    <script>
+        $(document).ready(function(){
+            $.ajax({
+                url: 'notificationsFrontend/',
+                type: 'GET',
+                success: function (response) {
+                    // Clear existing content
+                    $('dropdown-notifikasi').empty();
+
+                    console.log(response.result);
+                    console.log(response.result.judul);
+                    // Append data from the response
+                    if (response && response.result) {
+
+                    $.each(response.result, function (key, value) {
+                        const timeAgo = moment(value.created_at).locale('id').fromNow();
+                        const historyRoute = "history";
+                        $('#dropdown-notifikasi').append(`
+                            <a href="${historyRoute}" class="dropdown-item dropdown-item-notif" style="margin-bottom:0.5rem;">
+                                <div class="dropdown-item-icon bg-info text-white">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="dropdown-item-desc">
+                                    <p class="notif-value"> ${value.deskripsi}</p> 
+                                    <div class="text-primary notif-time">${timeAgo}</div>
+                                </div>
+                            </a>
+                        `);
+                    });
+
+
+                    } else {
+                        // Handle empty or invalid response
+                        $('.dropdown-list-content').append("<p>Tidak ada notifikasi ditemukan</p>");
+                    }
+                },
+                error: function (error) {
+                    console.error('Error fetching notifications:', error);
+                }
+            });
+        });
+    </script>
+
     
     <!-- Template JS File -->
     

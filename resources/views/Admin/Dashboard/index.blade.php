@@ -16,6 +16,12 @@
              <!-- CSS Libraries -->
         <link rel="stylesheet"
         href="{{ asset('library/chocolat/dist/css/chocolat.css') }}">
+        <style>
+            .active-chart{
+                background: #6777ef !important;
+                color: #fff !important;
+            }
+        </style>
     @endslot
 
     @slot('main')
@@ -91,10 +97,49 @@
                         <div class="col-lg-8 col-md-12 col-12 col-sm-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h4>Statistik</h4>
+                                    <div class="row" style="width: 100%;">
+                                        <div class="col-lg-12 d-flex justify-content-between align-items-center mb-4" style="width: 100%;">
+                                            <ul class="nav nav-pills">
+                                                <li class="nav-item">
+                                                    <a class="nav-link filter-status active" href="javascript:void(0)" data-statuschart="">All </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link filter-status" href="javascript:void(0)" data-statuschart="Ditolak">Ditolak</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link filter-status" href="javascript:void(0)" data-statuschart="Ditinjau">Ditinjau </span></a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link filter-status" href="javascript:void(0)" data-statuschart="Terkonfirmasi">Terkonfirmasi </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link filter-status" href="javascript:void(0)" data-statuschart="Tersampaikan">Tersampaikan</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link filter-status" href="javascript:void(0)" data-statuschart="Proses">Proses</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link filter-status" href="javascript:void(0)" data-statuschart="Selesai">Selesai</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-lg-12 d-flex justify-content-between align-items-center">
+                                            <h4>Statistik</h4>
+                                            <div class="card-header-action">
+                                                <div class="btn-group">
+                                                    <a href="javascript:void(0)" data-chart="minggu"
+                                                        class="btn filter_statistik active-chart">Minggu</a>
+                                                    <a href="javascript:void(0)" data-chart="bulan"
+                                                        class="btn filter_statistik">Bulan</a>
+                                                    <a href="javascript:void(0)" data-chart="tahun"
+                                                        class="btn filter_statistik">Tahun</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="card-body">
-                                    <canvas id="chartPengaduan"></canvas>
+                                    <canvas id="chartPengaduanMinggu" class="minggu-chart"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -149,50 +194,249 @@
         <script src="{{ asset('js/page/index-0.js') }}"></script>
 
         <script>
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+            // Fungsi untuk mengonversi nama hari ke bahasa Indonesia
+            function convertToIndonesianDay(day) {
+                const daysInEnglish = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const daysInIndonesian = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+                const index = daysInEnglish.indexOf(day);
+
+                if (index !== -1) {
+                    return daysInIndonesian[index];
+                } else {
+                    return day; // Jika tidak ditemukan, kembalikan nilai asli
+                }
+            }
+            function clearChart() {
+                if (window.myTahunChart) {
+                    window.myTahunChart.destroy();
+                }
+                if (window.myBulanChart) {
+                    window.myBulanChart.destroy();
+                }
+                if (window.myMingguChart) {
+                    window.myMingguChart.destroy();
+                }
+            }
+
+            let dataStatusChart = '';
+            let dataFilterChart = 'minggu';
+
+            function pantauPerubahan() {
+                if(dataFilterChart == 'minggu'){
+                    chartMinggu(dataStatusChart);
+                }else if(dataFilterChart == 'bulan'){
+                    chartBulan(dataStatusChart);
+                }else if(dataFilterChart == 'tahun'){
+                    chartTahun(dataStatusChart);
+                }
+            }
+
+            function chartMinggu(statusChart) {
+
+                var ctx = $('.minggu-chart')[0].getContext('2d');
+
+               clearChart()
+                $.ajax({
+                    url: 'showChartMinggu',
+                    type: 'GET',
+                    data: {
+                        STATUS : statusChart,
+                    },
+                    success: function(response) {
+                        if (response && response.success) {
+
+                            var hariPengaduanArray = [];
+                            var jumlahPengaduanArray = [];
+
+                            // Iterasi pada objek respons
+                            response.success.forEach(function (data) {
+                                // Ekstrak nilai hari_pengaduan dan jumlah_pengaduan
+                                var hariPengaduan = data.hari_pengaduan;
+                                var jumlahPengaduan = data.jumlah_pengaduan;
+
+                                // Tambahkan nilai ke array masing-masing
+                                hariPengaduanArray.push(hariPengaduan);
+                                jumlahPengaduanArray.push(jumlahPengaduan);
+                                
+                            });
+
+                            hariPengaduanArray = hariPengaduanArray.map(day => convertToIndonesianDay(day));
+
+                            window.myMingguChart = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: hariPengaduanArray,
+                                    datasets: [{
+                                        label: 'Statistics',
+                                        data: jumlahPengaduanArray,
+                                        borderWidth: 2,
+                                        backgroundColor: '#6777ef',
+                                        fill: false,
+                                        borderColor: '#6777ef',
+                                        borderWidth: 2.5,
+                                        pointBackgroundColor: '#ffffff',
+                                        pointRadius: 4
+                                    }]
+                                },
+                            });
+
+                        
+                        }
+                    }
+                });
+          
+            }
+            function chartBulan(statusChart) {
+
+                var ctx = $('.bulan-chart')[0].getContext('2d');
+
+               clearChart()
+                $.ajax({
+                    url: 'showChartBulan',
+                    type: 'GET',
+                    data: {
+                        STATUS : statusChart,
+                    },
+                    success: function(response) {
+                        if (response && response.success) {
+
+                            console.log(response.success);
+                            var tanggalPengaduanArray = [];
+                            var jumlahPengaduanArray = [];
+
+                            // Iterasi pada objek respons
+                            response.success.forEach(function (data) {
+                                // Ekstrak nilai hari_pengaduan dan jumlah_pengaduan
+                                var tanggalPengaduan = data.tanggal;
+                                var jumlahPengaduan = data.jumlah_pengaduan;
+
+                                // Tambahkan nilai ke array masing-masing
+                                tanggalPengaduanArray.push(tanggalPengaduan);
+                                jumlahPengaduanArray.push(jumlahPengaduan);
+                                
+                            });
+
+                            window.myBulanChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: tanggalPengaduanArray,
+                                    datasets: [{
+                                        label: 'Statistics',
+                                        data:jumlahPengaduanArray,
+                                        fill: false,
+                                        tension: 0.1,
+                                        borderColor: '#6777ef',
+                                    }]
+                                },
+                            });
+
+                        
+                        }
+                    }
+                });
+          
+            }
+            function chartTahun(statusChart) {
+
+                var ctx = $('.tahun-chart')[0].getContext('2d');
+
+               clearChart()
+                $.ajax({
+                    url: 'showChartTahun',
+                    type: 'GET',
+                    data: {
+                        STATUS : statusChart,
+                    },
+                    success: function(response) {
+                        if (response && response.success) {
+
+                            console.log(response.success);
+                            var bulanPengaduanArray = [];
+                            var jumlahPengaduanArray = [];
+
+                            // Iterasi pada objek respons
+                            response.success.forEach(function (data) {
+                                // Ekstrak nilai hari_pengaduan dan jumlah_pengaduan
+                                var bulanPengaduan = data.bulan;
+                                var jumlahPengaduan = data.jumlah_pengaduan;
+
+                                // Tambahkan nilai ke array masing-masing
+                                bulanPengaduanArray.push(bulanPengaduan);
+                                jumlahPengaduanArray.push(jumlahPengaduan);
+                                
+                            });
+
+                            window.myTahunChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: bulanPengaduanArray,
+                                    datasets: [{
+                                        label: 'Statistics',
+                                        data:jumlahPengaduanArray,
+                                        fill: false,
+                                        tension: 0.1,
+                                        borderColor: '#6777ef',
+                                    }]
+                                },
+                            });
+
+                        
+                        }
+                    }
+                });
+          
+            }
+           
+
+
+            $('.filter-status').click(function(){
+                var data_chart = $(this).data('statuschart');
+                $('.filter-status').removeClass('active');
+                $(this).addClass('active');
+                dataStatusChart = data_chart;
+                pantauPerubahan()
+            });
+
             
 
-            var ctx = document.getElementById("chartPengaduan").getContext('2d');
-            var myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: {!! json_encode($days) !!},
-                    datasets: [{
-                        label: 'Statistics',
-                        data: {!! json_encode(array_values($dataCounts)) !!},
-                        borderWidth: 2,
-                        backgroundColor: '#6777ef',
-                        borderColor: '#6777ef',
-                        borderWidth: 2.5,
-                        pointBackgroundColor: '#ffffff',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    legend: {
-                        display: false
-                    },
-                    scales: {
-                        yAxes: [{
-                            gridLines: {
-                                drawBorder: false,
-                                color: '#f2f2f2',
-                            },
-                            ticks: {
-                                beginAtZero: true,
-                                stepSize: 1 // Sesuaikan dengan kebutuhan Anda
-                            }
-                        }],
-                        xAxes: [{
-                            ticks: {
-                                display: true
-                            },
-                            gridLines: {
-                                display: false
-                            }
-                        }]
-                    },
-                }
+            $(document).ready(function(){
+                pantauPerubahan()
+                $('.filter_statistik').click(function(){
+                    var data_chart = $(this).data('chart');
+                    if(data_chart == 'minggu'){
+                        dataFilterChart = 'minggu';
+                        $('.filter_statistik').removeClass('active-chart');
+                        $(this).addClass('active-chart');
+                        $('canvas').removeClass();
+                        $('canvas').addClass('minggu-chart');
+                        pantauPerubahan()
+                    }else if(data_chart == 'bulan'){
+                        dataFilterChart = 'bulan';
+                        $('.filter_statistik').removeClass('active-chart');
+                        $(this).addClass('active-chart');
+                        $('canvas').removeClass();
+                        $('canvas').addClass('bulan-chart');
+                        pantauPerubahan()
+                    }else if(data_chart == 'tahun'){
+                        dataFilterChart = 'tahun';
+                        $('.filter_statistik').removeClass('active-chart');
+                        $(this).addClass('active-chart');
+                        $('canvas').removeClass();
+                        $('canvas').addClass('tahun-chart');
+                        pantauPerubahan()
+                    }
+                });
+                
             });
+          
+           
 
         </script>
     @endslot

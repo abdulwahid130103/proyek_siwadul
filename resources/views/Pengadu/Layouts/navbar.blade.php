@@ -7,6 +7,46 @@
         box-shadow: none !important;
         border-color: transparent !important;
     }
+    .dropdown-item-notif{
+      display: flex;
+      
+    }
+    .dropdown-item-icon{
+      flex-shrink: 0;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      line-height: 42px;
+      text-align: center;
+    }
+    #dropdown-notifikasi{
+      top: 40px;
+      padding: 1rem 0;
+      width: 350px !important; /* Sesuaikan lebar dropdown sesuai kebutuhan */
+      height: auto !important;
+      max-width: 438px !important;
+      overflow-y: auto;
+    }
+    .dropdown-item-desc{
+      margin-left: 15px;
+      line-height: 20px;
+    }
+    .dropdown-title{
+      padding: 0 1rem 1rem 1rem;
+      color: #6c757d;
+
+    }
+    .notif-value{
+      font-family: "sfProMedium", sans-serif !important;
+      font-size: 15px;
+      color: #545454;
+      line-height: 10px;
+    }
+    .notif-time{
+      font-family: "sfProMedium", sans-serif !important;
+      font-size: 14px;
+      line-height: 5px;
+    }
 </style>
 
 @if (Auth::user())
@@ -102,16 +142,28 @@
         </li>
       </ul>
       <ul class="navbar-nav ms-auto">
-        @if (!Auth::user()) 
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('login') }}">
-              <button class="btn btn-primary btn-daftar d-flex flex-row" type="button">
-                <ion-icon name="log-in-outline" class="icon-daftar"></ion-icon>
-                <span style="transform: translateX(-15px)">Masuk</span>
-              </button>
-            </a>
+          @if (!Auth::user()) 
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('login') }}">
+                <button class="btn btn-primary btn-daftar d-flex flex-row" type="button">
+                  <ion-icon name="log-in-outline" class="icon-daftar"></ion-icon>
+                  <span style="transform: translateX(-15px)">Masuk</span>
+                </button>
+              </a>
+            </li>
+          @else
+            <li class="nav-item">
+              <div class="dropdown">
+                  <div class="btn-group dropstart" style="color: #fff !important;">
+                      <a href="" class="dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="color: #fff !important;transform:translateY(7px);">
+                          <i class="far fa-bell text-light"></i>
+                      </a>
+                      <ul class="dropdown-menu" id="dropdown-notifikasi">
+                        <h6 class="dropdown-title">Notification</h6>
+                      </ul>
+                  </div>
+              </div>
           </li>
-        @else
           <li id="dropdown-navbar" id="nama_user_parent" class="nav-item dropdown" style="transform: translateY(-2px)">
             <button id="usm-nv"
               style="color:#fff !important;"
@@ -143,6 +195,7 @@
 
 <script>
 
+
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -161,6 +214,9 @@
         $('.navbar-brand > h6').addClass('text-dark');
         $('.nama_user').removeClass('text-light');
         $('.nama_user').addClass('text-dark');
+        $('.fa-bell').removeClass('text-light');
+        $('.fa-bell').addClass('text-dark');
+        // $('.fa-bell').addClass('text-dark');
         // $('.navbar-brand > .nav-item > .nav-link > button').replace('text-dark');
       }else{
         $('.navbar').removeClass('header');
@@ -172,6 +228,8 @@
         $('.nama_user').removeClass('text-dark');
         $('.navbar-brand > h6').addClass('text-white');
         $('.navbar-brand > h6').removeClass('text-dark');
+        $('.fa-bell').addClass('text-light');
+        $('.fa-bell').removeClass('text-dark');
       }
     }
 
@@ -193,5 +251,7 @@
               $('#showfoto').attr('src', '/storage/user/' + response.result.foto);
           }
       });
+
+      
     });
 </script>
