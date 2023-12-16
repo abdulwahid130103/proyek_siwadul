@@ -10,17 +10,19 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\UserRequest;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UserRequestUpdate;
+use Illuminate\Support\Facades\Hash;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UserRequestUpdate;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
+use Kreait\Laravel\Firebase\Facades\Firebase;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    
     public function index()
     {
         $user = User::with(['jabatan','pengaduan','notifications'])->latest()->get();
@@ -75,11 +77,30 @@ class UserController extends Controller
         if($validasi->fails()){
             return response()->json(['status' => 0 ,'errors'=> $validasi->errors()]);
         }else{
-            $filename = null;
-            $filename = UserHelper::create_image($request,$filename);
-            UserHelper::Store($request,$filename);
-            return response()->json(["success" => "Berhasil menyimpan data user"]);
+            // $auth = Firebase::auth();
+
+            // try {
+            //     $userProperties = [
+            //         'email' => $request->input('email'),
+            //         'password' => $request->input('password'),
+            //     ];
+        
+            //     $user = $auth->createUser($userProperties);
+            //     $auth->sendEmailVerificationLink($request->input('email'));
+
+                $filename = null;
+                $filename = UserHelper::create_image($request,$filename);
+                UserHelper::Store($request,$filename);
+                return response()->json(["success" => "Berhasil menyimpan data user"]);
+                
+            // } catch (\Exception $e) {
+            //     return response()->json(['success' => "error"],);
+            // }
+     
         }
+       
+
+   
     }
 
     /**

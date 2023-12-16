@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Jabatan;
 use Illuminate\Http\Request;
+use App\Services\FirbaseKoneksi;
+use App\FirbaseEntity\JabatanEntity;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\JabatanRequest;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +15,14 @@ class JabatanController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    private $database;
+
+    public function __construct()
+    {
+        $this->database = FirbaseKoneksi::connect();
+    }
+    
     public function index()
     {
         $jabatan = Jabatan::with('users')->latest()->get();
@@ -50,9 +60,17 @@ class JabatanController extends Controller
             return response()->json(['status' => 0 ,'errors'=> $validasi->errors()]);
         }else{
 
-            Jabatan::create([
+            $newJenisPengaduan = Jabatan::create([
                 'nama_jabatan' => $request->nama_jabatan,
             ]);
+
+            // $createdId = $newJenisPengaduan->id;
+            
+            // $this->database
+            // ->getReference('jabatan/' . $createdId)
+            // ->set([
+            //     JabatanEntity::getNamaJabatan() => $request->nama_jabatan,
+            // ]);
             return response()->json(["success" => "Berhasil menyimpan data jabatan"]);
         }
     }

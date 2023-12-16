@@ -11,6 +11,7 @@
         "php": "^8.1",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^2.7",
+        "kreait/laravel-firebase": "^5.5",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
@@ -34,7 +35,13 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/Admin/UserHelper.php"
+            "app/Helpers/Admin/UserHelper.php",
+            "app/Services/FirbaseKoneksi.php",
+            "app/FirbaseEntity/JenisPengaduanEntity.php",
+            "app/FirbaseEntity/JabatanEntity.php",
+            "app/FirbaseEntity/UserEntity.php",
+            "app/FirbaseEntity/PengaduanEntity.php",
+            "app/FirbaseEntity/NotificationsEntity.php"
         ]
     },
     "autoload-dev": {

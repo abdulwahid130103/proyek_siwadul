@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Models\JenisPengaduan;
+use App\Services\FirbaseKoneksi;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use App\FirbaseEntity\JenisPengaduanEntity;
 use App\Http\Requests\JenisPengaduanRequest;
 
 class JenisPengaduanController extends Controller
@@ -13,6 +15,12 @@ class JenisPengaduanController extends Controller
     /**
      * Display a listing of the resource.
      */
+    private $database;
+
+    public function __construct()
+    {
+        $this->database = FirbaseKoneksi::connect();
+    }
     public function index()
     {
         $jenisPengaduan = JenisPengaduan::with('pengaduans')->latest()->get();
@@ -49,9 +57,16 @@ class JenisPengaduanController extends Controller
         if($validasi->fails()){
             return response()->json(['status' => 0 ,'errors'=> $validasi->errors()]);
         }else{
-            JenisPengaduan::create([
+            $newJenisPengaduan = JenisPengaduan::create([
                 'nama_jenis_pengaduan' => $request->nama_jenis_pengaduan,
             ]);
+            // $createdId = $newJenisPengaduan->id;
+            
+            // $this->database
+            // ->getReference('jenisPengaduan/' . $createdId)
+            // ->set([
+            //     JenisPengaduanEntity::getNamaJenisPengaduan() => $request->nama_jenis_pengaduan,
+            // ]);
             return response()->json(["success" => "Berhasil menyimpan data jenis pengaduan"]);
         }
     }
